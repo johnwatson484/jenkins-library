@@ -1,2 +1,2 @@
-# jenkins-library
-Jenkins shared library
+# Jenkins Library
+Example Jenkins shared library
