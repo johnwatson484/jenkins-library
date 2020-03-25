@@ -18,7 +18,7 @@ def call(Map config=[:], Closure body={}) {
       //   setGithubStatusPending()
       // }
       stage('Set PR, and containerTag variables') {
-        (repoName, pr, containerTag, mergedPrNo) = getVariables(getPackageJsonVersion)
+        (repoName, pr, containerTag, mergedPrNo) = getVariables version: getPackageJsonVersion
         echo repoName
         echo pr
         echo containerTag
