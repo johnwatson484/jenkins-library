@@ -18,7 +18,7 @@ def call(Map config=[:], Closure body={}) {
       //   setGithubStatusPending()
       // }
       stage('Set PR, and containerTag variables') {
-        (repoName, pr, containerTag, mergedPrNo) = getVariables version: getPackageJsonVersion
+        (repoName, pr, containerTag, mergedPrNo) = getVariables(getPackageJsonVersion())
         echo repoName
         echo pr
         echo containerTag
@@ -119,4 +119,5 @@ def call(Map config=[:], Closure body={}) {
     //   defraUtils.deleteTestOutput(serviceName, containerSrcFolder)
     // }
   }
+  body()
 }
