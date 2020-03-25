@@ -1,5 +1,4 @@
 package org.example
-import org.example.Constants
 
 class Notify {
   def exec(Map config=[:]) {
