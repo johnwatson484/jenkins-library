@@ -1,3 +1,4 @@
+def repoName = ''
 def branch = ''
 def pr = ''
 def mergedPrNo = ''
@@ -16,9 +17,13 @@ def call(Map config=[:], Closure body={}) {
       // stage('Set GitHub status as pending'){
       //   setGithubStatusPending()
       // }
-      // stage('Set PR, and containerTag variables') {
-      //   (pr, containerTag, mergedPrNo) = defraUtils.getVariables(serviceName, defraUtils.getPackageJsonVersion())
-      // }
+      stage('Set PR, and containerTag variables') {
+        (repoName, pr, containerTag, mergedPrNo) = getVariables(getPackageJsonVersion())
+        echo repoName
+        echo pr
+        echo containerTag
+        echo mergedPrNo
+      }
       // stage('Helm lint') {
       //   defraUtils.lintHelm(serviceName)
       // }
