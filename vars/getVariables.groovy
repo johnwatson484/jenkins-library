@@ -1,4 +1,5 @@
-def getVariables(version) {
+ def call(Map config=[:], Closure body={}) { 
+  def getVariables(version) {
     branch = BRANCH_NAME
     repoName = getRepoName(getRepoUrl())
     // use the git API to get the open PR for a branch
@@ -17,4 +18,6 @@ def getVariables(version) {
     repoUrl = getRepoUrl()
     commitSha = getCommitSha()
     return [repoName, pr, containerTag, mergedPrNo]
+  }
 }
+
