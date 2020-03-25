@@ -1,20 +1,9 @@
-def call(Map config=[:], Closure body) {
-  node {
-    stage("Lint Helm") {
-      echo "linting Helm"
-    }
-    stage("Build Test Image") {
-       echo "build test image"
-    }
-    stage("Run Tests") {
-       echo "running tests"
-    }
-    stage("Publish Test Report") {
-       echo "publish test report"
-    }
-    stage("Fix Report Path") {
-       echo "fixing report path"
-    }
-    body()
+def runTests(projectName, serviceName, buildNumber) {
+  try {
+    sh 'mkdir -p test-output'
+    sh 'chmod 777 test-output'
+    sh "docker-compose -p $projectName-$containerTag-$buildNumber -f docker-compose.yaml -f docker-compose.test.yaml run $serviceName"
+  } finally {
+    sh "docker-compose -p $projectName-$containerTag-$buildNumber -f docker-compose.yaml -f docker-compose.test.yaml down -v"
   }
 }
