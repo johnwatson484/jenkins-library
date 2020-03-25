@@ -5,56 +5,75 @@ def mergedPrNo = ''
 def containerTag = ''
 def repoUrl = ''
 def commitSha = ''
+def containerSrcFolder = '\\/home\\/node'
+def lcovFile = './test-output/lcov.info'
+def localSrcFolder = '.'
+def timeoutInMinutes = 10
 def workspace
 
+def setGithubStatusPending = load 'setGithubStatusPending'
+def setGithubStatusSuccess = 'setGithubStatusSuccess'
+def setGithubStatusFailure = 'setGithubStatusFailure'
 def getVariables = load 'getVariables.groovy'
 def getPackageJsonVersion = load 'getPackageJsonVersion'
+def lintHelm = load 'lintHelm'
+def buildTestImage = load 'buildTestImage'
+def runTests = load 'runTests'
+def createTestReportJUnit = load 'createTestReportJUnit'
+def replaceInFile = load 'replaceInFile'
+def sonarQubeEnv = 'SonarQube'
+def sonarScanner = 'SonarScanner'
+def analyseCode = 'analyseCode'
+def waitForQualityGateResult = 'waitForQualityGateResult'
+def buildAndPushContainerImage = 'buildAndPushContainerImage'
+def notifySlackBuildFailure = 'notifySlackBuildFailure'
+def deleteTestOutput = 'deleteTestOutput'
+def verifyPackageJsonVersionIncremented = 'verifyPackageJsonVersionIncremented'
+def undeployChart = 'undeployChart'
+def publishChart = 'publishChart'
+def triggerRelease = 'triggerRelease'
 
 def call(Map config=[:], Closure body={}) {
   node {
     checkout scm
-    // try {
+    try {
       stage('Start') {
         echo "pipeline started"
       }
-      // stage('Set GitHub status as pending'){
-      //   setGithubStatusPending()
-      // }
+      stage('Set GitHub status as pending'){
+        setGithubStatusPending.setGithubStatusPending()
+      }
       stage('Set PR, and containerTag variables') {
         (repoName, pr, containerTag, mergedPrNo) = getVariables.getVariables(getPackageJsonVersion.getPackageJsonVersion())
-        echo repoName
-        echo pr
-        echo containerTag
-        echo mergedPrNo
       }
-      // stage('Helm lint') {
-      //   defraUtils.lintHelm(serviceName)
-      // }
-      // stage('Build test image') {
-      //   defraUtils.buildTestImage(DOCKER_REGISTRY_CREDENTIALS_ID, DOCKER_REGISTRY, serviceName, BUILD_NUMBER)
-      // }
-      // stage('Run tests') {
-      //   defraUtils.runTests(serviceName, serviceName, BUILD_NUMBER)
-      // }
-      // stage('Create JUnit report'){
-      //   defraUtils.createTestReportJUnit()
-      // }
-      // stage('Fix lcov report') {
-      //   defraUtils.replaceInFile(containerSrcFolder, localSrcFolder, lcovFile)
-      // }
-      // stage('SonarQube analysis') {
-      //   defraUtils.analyseCode(sonarQubeEnv, sonarScanner, ['sonar.projectKey' : serviceName, 'sonar.sources' : '.'])
-      // }
-      // stage("Code quality gate") {
-      //   defraUtils.waitForQualityGateResult(timeoutInMinutes)
-      // }
-      // stage('Push container image') {
-      //   defraUtils.buildAndPushContainerImage(DOCKER_REGISTRY_CREDENTIALS_ID, DOCKER_REGISTRY, serviceName, containerTag)
-      // }
-      // if (pr != '') {
-      //   stage('Verify version incremented') {
-      //     defraUtils.verifyPackageJsonVersionIncremented()
-      //   }
+      stage('Helm lint') {
+        lintHelm.lintHelm(repoName)
+      }
+      stage('Build test image') {
+        buildTestImage.buildTestImage(DOCKER_REGISTRY_CREDENTIALS_ID, DOCKER_REGISTRY, repoName, BUILD_NUMBER)
+      }
+      stage('Run tests') {
+        runTests.runTests(repoName, repoName, BUILD_NUMBER)
+      }
+      stage('Create JUnit report'){
+        createTestReportJUnit.createTestReportJUnit()
+      }
+      stage('Fix lcov report') {
+        replaceInFile.replaceInFile(containerSrcFolder, localSrcFolder, lcovFile)
+      }
+      stage('SonarQube analysis') {
+        analyseCode.analyseCode(sonarQubeEnv, sonarScanner, ['sonar.projectKey' : repoName, 'sonar.sources' : '.'])
+      }
+      stage("Code quality gate") {
+        waitForQualityGateResult.waitForQualityGateResult(timeoutInMinutes)
+      }
+      stage('Push container image') {
+        buildAndPushContainerImage.buildAndPushContainerImage(DOCKER_REGISTRY_CREDENTIALS_ID, DOCKER_REGISTRY, repoName, containerTag)
+      }
+      if (pr != '') {
+        stage('Verify version incremented') {
+          verifyPackageJsonVersionIncremented.verifyPackageJsonVersionIncremented()
+        }
       //   stage('Helm install') {
       //     withCredentials([
       //         string(credentialsId: 'web-alb-tags', variable: 'albTags'),
@@ -85,18 +104,18 @@ def call(Map config=[:], Closure body={}) {
       //       echo "Build available for review at https://ffc-demo-$containerTag.$INGRESS_SERVER"
       //     }
       //   }
-      // }
-      // if (pr == '') {
-      //   stage('Publish chart') {
-      //     defraUtils.publishChart(DOCKER_REGISTRY, serviceName, containerTag)
-      //   }
-      //   stage('Trigger GitHub release') {
-      //     withCredentials([
-      //       string(credentialsId: 'github-auth-token', variable: 'gitToken')
-      //     ]) {
-      //       defraUtils.triggerRelease(containerTag, serviceName, containerTag, gitToken)
-      //     }
-      //   }
+      }
+      if (pr == '') {
+        stage('Publish chart') {
+          publishChart.publishChart(DOCKER_REGISTRY, repoName, containerTag)
+        }
+        stage('Trigger GitHub release') {
+          withCredentials([
+            string(credentialsId: 'github-auth-token', variable: 'gitToken')
+          ]) {
+            triggerRelease.triggerRelease(containerTag, repoName, containerTag, gitToken)
+          }
+        }
       //   stage('Trigger Deployment') {
       //     withCredentials([
       //       string(credentialsId: 'web-deploy-job-name', variable: 'deployJobName'),
@@ -106,21 +125,21 @@ def call(Map config=[:], Closure body={}) {
       //     }
       //   }
       // }
-      // if (mergedPrNo != '') {
-      //   stage('Remove merged PR') {
-      //     defraUtils.undeployChart(KUBE_CREDENTIALS_ID, serviceName, mergedPrNo)
-      //   }
-      // }
-    //   stage('Set GitHub status as success'){
-    //     defraUtils.setGithubStatusSuccess()
-    //   }
-    // } catch(e) {
-    //   defraUtils.setGithubStatusFailure(e.message)
-      //defraUtils.notifySlackBuildFailure(e.message, "#generalbuildfailures")
-    //  throw e
-    // } finally {
-    //   defraUtils.deleteTestOutput(serviceName, containerSrcFolder)
-    // }
+      if (mergedPrNo != '') {
+        stage('Remove merged PR') {
+          undeployChart.undeployChart(KUBE_CREDENTIALS_ID, repoName, mergedPrNo)
+        }
+      }
+      stage('Set GitHub status as success'){
+        setGithubStatusSuccess.setGithubStatusSuccess()
+      }
+    } catch(e) {
+      setGithubStatusFailure.setGithubStatusFailure(e.message)
+      notifySlackBuildFailure.notifySlackBuildFailure(e.message, "#generalbuildfailures")
+     throw e
+    } finally {
+      deleteTestOutput.deleteTestOutput(repoName, containerSrcFolder)
+    }
   }
   body()
 }
