@@ -7,6 +7,9 @@ def repoUrl = ''
 def commitSha = ''
 def workspace
 
+def getVariables = load 'getVariables.groovy'
+def getPackageJsonVersion = load 'getPackageJsonVersion'
+
 def call(Map config=[:], Closure body={}) {
   node {
     checkout scm
