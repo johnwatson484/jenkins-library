@@ -8,10 +8,13 @@ def workspace
 
 node {
   checkout scm
-  try {
-    stage('Set GitHub status as pending'){
-      setGithubStatusPending()
+  // try {
+    stage('Start') {
+      echo "pipeline started"
     }
+    // stage('Set GitHub status as pending'){
+    //   setGithubStatusPending()
+    // }
     // stage('Set PR, and containerTag variables') {
     //   (pr, containerTag, mergedPrNo) = defraUtils.getVariables(serviceName, defraUtils.getPackageJsonVersion())
     // }
@@ -99,14 +102,14 @@ node {
     //     defraUtils.undeployChart(KUBE_CREDENTIALS_ID, serviceName, mergedPrNo)
     //   }
     // }
-    stage('Set GitHub status as success'){
-      defraUtils.setGithubStatusSuccess()
-    }
-  } catch(e) {
-    defraUtils.setGithubStatusFailure(e.message)
+  //   stage('Set GitHub status as success'){
+  //     defraUtils.setGithubStatusSuccess()
+  //   }
+  // } catch(e) {
+  //   defraUtils.setGithubStatusFailure(e.message)
     //defraUtils.notifySlackBuildFailure(e.message, "#generalbuildfailures")
-    throw e
-  }// } finally {
+  //  throw e
+  // } finally {
   //   defraUtils.deleteTestOutput(serviceName, containerSrcFolder)
   // }
 }
