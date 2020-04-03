@@ -14,7 +14,7 @@ def getVariables(version) {
 
   mergedPrNo = getMergedPrNo()
   repoUrl = getRepoUrl()
-  repoName = getRepoName(repoUrl)
+  repoName = getRepoName()
   commitSha = getCommitSha()
   return [repoName, pr, containerTag, mergedPrNo]
 }

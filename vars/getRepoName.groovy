@@ -1,3 +1,3 @@
-def getRepoUrl(repoUrl) {
-  return sh(returnStdout: true, script: "$(basename "$repoUrl" ".${repoUrl##*.}")").trim()
+def getRepoName() {
+  return scm.getUserRemoteConfigs()[0].getUrl().tokenize('/').last().split("\\.")[0]
 }
