@@ -138,6 +138,6 @@ def call(Map config=[:], Closure body={}) {
   //   } finally {
   //     deleteTestOutput.deleteTestOutput(repoName, containerSrcFolder)
   //   }
-  // }
+  }
   body()
 }
