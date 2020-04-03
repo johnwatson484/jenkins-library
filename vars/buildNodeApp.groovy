@@ -4,6 +4,7 @@ def pr = ''
 def mergedPrNo = ''
 def containerTag = ''
 def repoUrl = ''
+def repoName = ''
 def commitSha = ''
 def containerSrcFolder = '\\/home\\/node'
 def lcovFile = './test-output/lcov.info'
@@ -36,108 +37,10 @@ def triggerRelease = 'triggerRelease'
 def call(Map config=[:], Closure body={}) {
   node {
     checkout scm
-    // try {
-      // stage('Set GitHub status as pending'){
-      //   setGithubStatusPending.setGithubStatusPending()
-      // }
       stage('Set PR, and containerTag variables') {
-        (repoName, pr, containerTag, mergedPrNo) = getVariables.getVariables(getPackageJsonVersion.getPackageJsonVersion())
+        repoName = getRepoName.getRepoName()
         echo repoName
       }
-  //     stage('Helm lint') {
-  //       lintHelm.lintHelm(repoName)
-  //     }
-  //     stage('Build test image') {
-  //       buildTestImage.buildTestImage(DOCKER_REGISTRY_CREDENTIALS_ID, DOCKER_REGISTRY, repoName, BUILD_NUMBER)
-  //     }
-  //     stage('Run tests') {
-  //       runTests.runTests(repoName, repoName, BUILD_NUMBER)
-  //     }
-  //     stage('Create JUnit report'){
-  //       createTestReportJUnit.createTestReportJUnit()
-  //     }
-  //     stage('Fix lcov report') {
-  //       replaceInFile.replaceInFile(containerSrcFolder, localSrcFolder, lcovFile)
-  //     }
-  //     stage('SonarQube analysis') {
-  //       analyseCode.analyseCode(sonarQubeEnv, sonarScanner, ['sonar.projectKey' : repoName, 'sonar.sources' : '.'])
-  //     }
-  //     stage("Code quality gate") {
-  //       waitForQualityGateResult.waitForQualityGateResult(timeoutInMinutes)
-  //     }
-  //     stage('Push container image') {
-  //       buildAndPushContainerImage.buildAndPushContainerImage(DOCKER_REGISTRY_CREDENTIALS_ID, DOCKER_REGISTRY, repoName, containerTag)
-  //     }
-  //     if (pr != '') {
-  //       stage('Verify version incremented') {
-  //         verifyPackageJsonVersionIncremented.verifyPackageJsonVersionIncremented()
-  //       }
-  //     //   stage('Helm install') {
-  //     //     withCredentials([
-  //     //         string(credentialsId: 'web-alb-tags', variable: 'albTags'),
-  //     //         string(credentialsId: 'web-alb-security-groups', variable: 'albSecurityGroups'),
-  //     //         string(credentialsId: 'web-alb-arn', variable: 'albArn'),
-  //     //         string(credentialsId: 'web-cookie-password', variable: 'cookiePassword')
-  //     //       ]) {
-
-  //     //       def helmValues = [
-  //     //         /container.redeployOnChange="$pr-$BUILD_NUMBER"/,
-  //     //         /container.redisHostname="$REDIS_HOSTNAME"/,
-  //     //         /container.redisPartition="ffc-demo-$containerTag"/,
-  //     //         /cookiePassword="$cookiePassword"/,
-  //     //         /ingress.alb.tags="$albTags"/,
-  //     //         /ingress.alb.arn="$albArn"/,
-  //     //         /ingress.alb.securityGroups="$albSecurityGroups"/,
-  //     //         /ingress.endpoint="ffc-demo-$containerTag"/,
-  //     //         /name="ffc-demo-$containerTag"/,
-  //     //         /labels.version="$containerTag"/
-  //     //       ].join(',')
-
-  //     //       def extraCommands = [
-  //     //         "--values ./helm/$serviceName/jenkins-aws.yaml",
-  //     //         "--set $helmValues"
-  //     //       ].join(' ')
-
-  //     //       defraUtils.deployChart(KUBE_CREDENTIALS_ID, DOCKER_REGISTRY, serviceName, containerTag, extraCommands)
-  //     //       echo "Build available for review at https://ffc-demo-$containerTag.$INGRESS_SERVER"
-  //     //     }
-  //     //   }
-  //     }
-  //     if (pr == '') {
-  //       stage('Publish chart') {
-  //         publishChart.publishChart(DOCKER_REGISTRY, repoName, containerTag)
-  //       }
-  //       stage('Trigger GitHub release') {
-  //         withCredentials([
-  //           string(credentialsId: 'github-auth-token', variable: 'gitToken')
-  //         ]) {
-  //           triggerRelease.triggerRelease(containerTag, repoName, containerTag, gitToken)
-  //         }
-  //       }
-  //     //   stage('Trigger Deployment') {
-  //     //     withCredentials([
-  //     //       string(credentialsId: 'web-deploy-job-name', variable: 'deployJobName'),
-  //     //       string(credentialsId: 'web-deploy-token', variable: 'jenkinsToken')
-  //     //     ]) {
-  //     //       defraUtils.triggerDeploy(JENKINS_DEPLOY_SITE_ROOT, deployJobName, jenkinsToken, ['chartVersion': containerTag])
-  //     //     }
-  //     //   }
-  //     // }
-  //     if (mergedPrNo != '') {
-  //       stage('Remove merged PR') {
-  //         undeployChart.undeployChart(KUBE_CREDENTIALS_ID, repoName, mergedPrNo)
-  //       }
-  //     }
-  //     stage('Set GitHub status as success'){
-  //       setGithubStatusSuccess.setGithubStatusSuccess()
-  //     }
-  //   } catch(e) {
-  //     setGithubStatusFailure.setGithubStatusFailure(e.message)
-  //     notifySlackBuildFailure.notifySlackBuildFailure(e.message, "#generalbuildfailures")
-  //    throw e
-  //   } finally {
-  //     deleteTestOutput.deleteTestOutput(repoName, containerSrcFolder)
-  //   }
   }
   body()
 }
